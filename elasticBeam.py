@@ -9,6 +9,7 @@ its left end and deformed under its own weight.
 
 from __future__ import print_function
 from fenics import *
+import matplotlib.pyplot as plt
 
 # Scaled variables
 L = 1; W = 0.2
@@ -35,11 +36,10 @@ bc = DirichletBC(V, Constant((0, 0, 0)), clamped_boundary)
 # Define strain and stress
 
 def epsilon(u):
-    return 0.5*(nabla_grad(u) + nabla_grad(u).T)
-    #return sym(nabla_grad(u))
+    return 0.5*(grad(u) + grad(u).T)
 
 def sigma(u):
-    return lambda_*nabla_div(u)*Identity(d) + 2*mu*epsilon(u)
+    return lambda_*div(u)*Identity(d) + 2*mu*epsilon(u)
 
 # Define variational problem
 u = TrialFunction(V)
@@ -69,8 +69,8 @@ u_magnitude = sqrt(dot(u, u))
 u_magnitude = project(u_magnitude, V)
 plot(u_magnitude, 'Displacement magnitude')
 print('min/max u:',
-      u_magnitude.vector().array().min(),
-      u_magnitude.vector().array().max())
+      u_magnitude.vector().get_local().min(),
+      u_magnitude.vector().get_local().max())
 
 # Save solution to file in VTK format
 File('elasticity/displacement.pvd') << u
@@ -78,5 +78,6 @@ File('elasticity/von_mises.pvd') << von_Mises
 File('elasticity/magnitude.pvd') << u_magnitude
 
 # Hold plot
-interactive()
+#interactive()  # NameError: name ‘interactive’ is not defined. See https://learnsharewithdp.wordpress.com/2018/06/11/nameerror-name-interactive-is-not-defined/
+plt.show()  # instead of interactive use this line to show the plots.
 
